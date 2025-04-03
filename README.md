@@ -5,7 +5,8 @@ Longitudinal GWAS with CTS approach
 This R script run the longitudinal GWAS with Conditional Two-Step approach. Reference paper: https://www.nature.com/articles/ejhg20151#Abs1
 
 # Usage
-Rscript CTS.R <pheno_file> <geno_file> <frq_file> <id_col> <time_col> <y_col> <fixedEffects> <outpath> <outprefix>
+Rscript CTS.R <pheno_file> <geno_file> <frq_file> <id_col> <time_col> <y_col> 
+<fixedEffects> <outpath> <outprefix>  
 
 # Arguments
 **pheno_file**: Full path to the phenotype file, longitudinal dataset with long-format
