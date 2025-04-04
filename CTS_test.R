@@ -203,13 +203,9 @@ message("=======================================================================
 message(" ")
 message(" ")
 
-
 ###############################################################################################################
-#### Produce QQ plot and Manhattan plot
+#### Extract SNPs with P-value < 1e-5 and perform LMM on those SNPs
 ###############################################################################################################
-
-
-message("Now generating the QQ plots and Manhatton Plots")
 
 dat <- fread(paste0(outpath,outprefix,"_CTS.Time.glm.linear"))
 dat <- as.data.frame(dat)
@@ -220,48 +216,6 @@ dat <- dat[is.finite(dat$P) & !is.na(dat$P), ]
 # also check for missing values in required columns
 dat <- dat[!is.na(dat$`#CHROM`) & !is.na(dat$POS) & !is.na(dat$ID), ]
 
-## calculate Lambda
-z=qnorm(dat$P/2)
-lambda = round(median(z^2,na.rm=T)/qchisq(0.5,df=1),3)
-message("The Lambda is ",lambda)
-message(" ")
-
-## QQ plot
-png(filename = paste0(outpath,outprefix,"_CTS_QQ.png"),
-    width = 8, height = 6, units = 'in', res = 300)
-qqman::qq(dat$P)
-dev.off()
-
-message("QQ plot is located at: ",paste0(outpath,outprefix,"_CTS_QQ.png"))
-message(" ")
-
-## Manhattan Plot with APOE
-png(filename = paste0(outpath,outprefix,"_CTS_Manhattan_withAPOE.png"),
-    width = 8, height = 6, units = 'in', res = 300)
-qqman::manhattan(dat, chr="#CHROM",bp="POS",p="P",snp="ID", annotateTop = T, annotatePval = 5e-8, col = c("darkgreen","darkblue"))
-dev.off()
-
-message("Manhatton plot with APOE region is located at: ",paste0(outpath,outprefix,"_CTS_Manhattan_withAPOE.png"))
-message(" ")
-
-## Manhattan Plot without APOE
-APOE.snps <- dat$ID[dat$`#CHROM` == 19 & dat$POS>=44656625 & dat$POS<=45159250]
-dat_noPAOE <- subset(dat,dat$ID %!in% APOE.snps)
-png(filename = paste0(outpath,outprefix,"_CTS_Manhattan_noAPOE.png"),
-    width = 8, height = 6, units = 'in', res = 300)
-qqman::manhattan(dat_noPAOE, chr="#CHROM",bp="POS",p="P",snp="ID", annotateTop = T, annotatePval = 1e-6, col = c("darkgreen","darkblue"))
-dev.off()
-message("Manhatton plot without APOE region is located at: ",paste0(outpath,outprefix,"_CTS_Manhattan_noAPOE.png"))
-message(" ")
-
-
-message("=======================================================================================================")
-message(" ")
-message(" ")
-
-###############################################################################################################
-#### Extract SNPs with P-value < 1e-5 and perform LMM on those SNPs
-###############################################################################################################
 snplist <- data.frame(SNP=dat$ID[dat$P< 1e-5])
 
 message("There are ", nrow(snplist), " SNPs has P value < 1e-5 from the CTS results")
@@ -338,6 +292,53 @@ message("The update for the CTS results file for those SNPs is complete.")
 message("=======================================================================================================")
 message(" ")
 message(" ")
+
+
+###############################################################################################################
+#### Produce QQ plot and Manhattan plot
+###############################################################################################################
+
+message("Now generating the QQ plots and Manhatton Plots")
+
+## calculate Lambda
+z=qnorm(dat$P/2)
+lambda = round(median(z^2,na.rm=T)/qchisq(0.5,df=1),3)
+message("The Lambda is ",lambda)
+message(" ")
+
+## QQ plot
+png(filename = paste0(outpath,outprefix,"_CTS_QQ.png"),
+    width = 8, height = 6, units = 'in', res = 300)
+qqman::qq(dat$P)
+dev.off()
+
+message("QQ plot is located at: ",paste0(outpath,outprefix,"_CTS_QQ.png"))
+message(" ")
+
+## Manhattan Plot with APOE
+png(filename = paste0(outpath,outprefix,"_CTS_Manhattan_withAPOE.png"),
+    width = 8, height = 6, units = 'in', res = 300)
+qqman::manhattan(dat, chr="#CHROM",bp="POS",p="P",snp="ID", annotateTop = T, annotatePval = 5e-8, col = c("darkgreen","darkblue"))
+dev.off()
+
+message("Manhatton plot with APOE region is located at: ",paste0(outpath,outprefix,"_CTS_Manhattan_withAPOE.png"))
+message(" ")
+
+## Manhattan Plot without APOE
+APOE.snps <- dat$ID[dat$`#CHROM` == 19 & dat$POS>=44656625 & dat$POS<=45159250]
+dat_noPAOE <- subset(dat,dat$ID %!in% APOE.snps)
+png(filename = paste0(outpath,outprefix,"_CTS_Manhattan_noAPOE.png"),
+    width = 8, height = 6, units = 'in', res = 300)
+qqman::manhattan(dat_noPAOE, chr="#CHROM",bp="POS",p="P",snp="ID", annotateTop = T, annotatePval = 1e-6, col = c("darkgreen","darkblue"))
+dev.off()
+message("Manhatton plot without APOE region is located at: ",paste0(outpath,outprefix,"_CTS_Manhattan_noAPOE.png"))
+message(" ")
+
+
+message("=======================================================================================================")
+message(" ")
+message(" ")
+
 
 ###############################################################################################################
 #### Prepare file for GWAMA
