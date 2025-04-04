@@ -45,4 +45,5 @@ Rscript /data/h_vmac/zhanm32/SPAREAD/CODE/scripts/CTS_test.R \
   1. handle missingness yourself before running the R script
   2. make sure at least two time points per individuals
   3. make sure the pheno_file include FID and IID columns that matching the geno file
+- Current code only support quantitative trait. 
 
