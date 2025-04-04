@@ -1,6 +1,9 @@
 # CTS
 Longitudinal GWAS with CTS approach
 
+![CTS drawio](https://github.com/user-attachments/assets/9bb50659-bada-4c59-9604-642281c9c3b0)
+
+
 # Description
 This R script run the longitudinal GWAS with Conditional Two-Step approach. Reference paper: https://www.nature.com/articles/ejhg20151#Abs1
 
