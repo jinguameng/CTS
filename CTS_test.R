@@ -110,7 +110,7 @@ if (length(missing_cols) > 0) {
   stop(paste("Error: The following required columns are missing from the phenotype file:", paste(missing_cols, collapse = ", ")))
 }
 
-message("=======================================================================")
+message("=======================================================================================================")
 message("Phenotype file is validated successfully!")
 message("Pheno file: ", pheno_file)
 message("ID Column: ", id_col)
@@ -118,7 +118,7 @@ message("Time Column: ", time_col)
 message("Outcome Variable: ", y_col)
 message("Fixed Effects for LMM: ", fixedEffects)
 message("Number of observations in pheno data: ", nrow(pheno_data))
-message("=======================================================================")
+message("=======================================================================================================")
 message(" ")
 message(" ")
 
@@ -178,6 +178,8 @@ blups = ranef(mod2)$id # Extract random slopes (BLUPs)
 
 ids <- pheno_data[,c(id_col,"FID","IID")]
 
+ids <- unique(pheno_data[, c(id_col, "FID", "IID")])
+
 blups[[id_col]] <- rownames(blups)
 
 blups <- merge(blups,ids,by = id_col)
@@ -186,27 +188,37 @@ blups <- blups[,c("FID","IID","Time")]
 
 fwrite(blups,paste0(outpath,outprefix,"_CTSrandomSlope.pheno"),col.names = T, row.names = F, quote = F, sep = "\t")
 
+
 ###############################################################################################################
 #### Association Test with PLINK2
 ###############################################################################################################
+
 
 phenofile <- paste0(outpath,outprefix,"_CTSrandomSlope.pheno")
 
 system(paste0("plink2 --bfile ",geno_file, " --linear allow-no-covars --pheno ",phenofile,
               "  --pheno-name Time --out ",outpath,outprefix,"_CTS"))
 
-message("=======================================================================")
+message("=======================================================================================================")
 message(" ")
 message(" ")
+
 
 ###############################################################################################################
 #### Produce QQ plot and Manhattan plot
 ###############################################################################################################
 
+
 message("Now generating the QQ plots and Manhatton Plots")
 
 dat <- fread(paste0(outpath,outprefix,"_CTS.Time.glm.linear"))
 dat <- as.data.frame(dat)
+
+# Remove rows with missing or non-finite P-values
+dat_clean <- dat[is.finite(dat$P) & !is.na(dat$P), ]
+
+# also check for missing values in required columns
+dat_clean <- dat_clean[!is.na(dat_clean$`#CHROM`) & !is.na(dat_clean$POS) & !is.na(dat_clean$ID), ]
 
 ## calculate Lambda
 z=qnorm(dat$P/2)
@@ -243,7 +255,7 @@ message("Manhatton plot without APOE region is located at: ",paste0(outpath,outp
 message(" ")
 
 
-message("=======================================================================")
+message("=======================================================================================================")
 message(" ")
 message(" ")
 
@@ -252,7 +264,7 @@ message(" ")
 ###############################################################################################################
 snplist <- data.frame(SNP=dat$ID[dat$P< 1e-5])
 
-message("There are ", length(snplist), "SNPs has P value < 1e-5 from the CTS results")
+message("There are ", nrow(snplist), " SNPs has P value < 1e-5 from the CTS results")
 message(" ")
 
 snplistpath <- paste0(outpath,outprefix,"_CTS_P1e5.snps")
@@ -323,7 +335,7 @@ dat$P[matched]       <- testsnpsout$P[idx[matched]]
 
 
 message("The update for the CTS results file for those SNPs is complete.")
-message("=======================================================================")
+message("=======================================================================================================")
 message(" ")
 message(" ")
 
@@ -350,12 +362,14 @@ dat <- dat[order(dat$ORIGINAL_ORDER), ] # Reorder based on the original order
 dat <- dat[,c("MARKERNAME","EA","NEA","BETA","SE","N","EAF","STRAND")]
 
 ## save the updated association results
-datpath <- paste0(outpath,outprefix,"EUR_ADNI_CTS_LMM_clean_GWAMA")
+datpath <- paste0(outpath,outprefix,"_CTS_LMM_clean_GWAMA")
 fwrite(dat,datpath,col.names = T, row.names = F, quote = F, sep = "\t")
 
 message("The association results file was cleaned for GWAMA and file was saved to: ",datpath)
 message(" ")
 
-message("=======================================================================")
+message("=======================================================================================================")
+message("=======================================================================================================")
+
 message(" ")
-message(" ")
+
