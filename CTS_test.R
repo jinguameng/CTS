@@ -215,10 +215,10 @@ dat <- fread(paste0(outpath,outprefix,"_CTS.Time.glm.linear"))
 dat <- as.data.frame(dat)
 
 # Remove rows with missing or non-finite P-values
-dat_clean <- dat[is.finite(dat$P) & !is.na(dat$P), ]
+dat <- dat[is.finite(dat$P) & !is.na(dat$P), ]
 
 # also check for missing values in required columns
-dat_clean <- dat_clean[!is.na(dat_clean$`#CHROM`) & !is.na(dat_clean$POS) & !is.na(dat_clean$ID), ]
+dat <- dat[!is.na(dat$`#CHROM`) & !is.na(dat$POS) & !is.na(dat$ID), ]
 
 ## calculate Lambda
 z=qnorm(dat$P/2)
