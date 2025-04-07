@@ -1,7 +1,8 @@
 # CTS
 Longitudinal GWAS with CTS approach
 
-![CTS drawio](https://github.com/user-attachments/assets/9bb50659-bada-4c59-9604-642281c9c3b0)
+![CTS drawio](https://github.com/user-attachments/assets/0ef81c0d-054d-4380-96bf-71743f94527f)
+
 
 
 # Description
