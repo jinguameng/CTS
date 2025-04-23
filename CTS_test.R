@@ -152,7 +152,11 @@ for (i in ids) {
   if (nrow(xi) < 2) next # Skip subjects with fewer than 2 time points
   xi = as.matrix(xi)
   A = cumsum(rep(1, nrow(xi)))  # Sequence 1,2,3,...
-  A1 = poly(A, degree = length(A) - 1)  # Orthogonal polynomials
+  if(nrow(xi) <= 10){
+    A1 = poly(A, degree = length(A) - 1)  # Orthogonal polynomials
+  }else{
+    A1 = poly(A, degree = 10)  # Orthogonal polynomials
+  }
   transxi = t(A1) %*% xi  # Apply transformation
   transxi = cbind(i, transxi)  # Add subject ID
   transdata = rbind(transdata, transxi)
