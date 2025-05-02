@@ -1,8 +1,7 @@
 # CTS
 Longitudinal GWAS with CTS approach
 
-![CTS drawio](https://github.com/user-attachments/assets/aa23da2e-ba25-452f-80da-e3549acd6740)
-
+![CTS drawio](https://github.com/user-attachments/assets/d401650b-cd7d-4fba-9d95-d5323bf0173b)
 
 # Description
 This R script run the longitudinal GWAS with Conditional Two-Step approach. Reference paper: https://www.nature.com/articles/ejhg20151#Abs1
@@ -15,8 +14,6 @@ This R script run the longitudinal GWAS with Conditional Two-Step approach. Refe
   - Example pheno_file: /data/h_vmac/zhanm32/SPAREAD/DATA/ADNI/CTS_ADNI.rds
 
 **geno_file**: Full path to the genotype file, file prefix included (PLINK .bim format)
-
-**frq_file**: Full path and full name of the SNP frequency file (e.g. /data/h_vmac/zhanm32/SPAREAD/DATA/ADNI/ADNI_EUR_snpweights_baseline_frq.frq)
 
 **id_col**: Column name in the phenotype file representing subject IDs
 
@@ -34,7 +31,6 @@ This R script run the longitudinal GWAS with Conditional Two-Step approach. Refe
 Rscript /data/h_vmac/zhanm32/SPAREAD/CODE/scripts/CTS_test.R \
 "/data/h_vmac/zhanm32/SPAREAD/DATA/ADNI/CTS_ADNI.rds" \
 "/data/h_vmac/zhanm32/SPAREAD/DATA/ADNI/ADNI_EUR_snpweights_baseline" \
-"/data/h_vmac/zhanm32/SPAREAD/DATA/ADNI/ADNI_EUR_snpweights_baseline_frq.frq" \
 "ID" \
 "interval_years" \
 "SPARE_AD" \
