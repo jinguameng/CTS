@@ -4,7 +4,7 @@
 ##              Reference paper: https://www.nature.com/articles/ejhg20151#Abs1
 ##
 ## Usage:
-##		Rscript CTS.R <pheno_file> <geno_file> <frq_file> <id_col> <time_col> <y_col> <fixedEffects> <outpath> <outprefix>
+##		Rscript CTS.R <pheno_file> <geno_file><id_col> <time_col> <y_col> <fixedEffects> <outpath> <outprefix>
 ##
 ##
 ## Arguments:
@@ -14,7 +14,6 @@
 ##                      -- FID and IID columns should also be included
 ##                      -- Example pheno_file: /data/h_vmac/zhanm32/SPAREAD/DATA/ADNI/CTS_ADNI.rds
 ##		geno_file       - Full path to the genotype file, file prefix included (PLINK .bim format)
-##    frq_file        - Full path and full name of the SNP frequency file (e.g. /data/h_vmac/zhanm32/SPAREAD/DATA/ADNI/ADNI_EUR_snpweights_baseline_frq.frq)
 ## 		id_col          - Column name in the phenotype file representing subject IDs
 ##		time_col        - Column name in the phenotype file representing time variable
 ##		y_col           - Outcome variable column name
@@ -27,7 +26,6 @@
 ##		Rscript /data/h_vmac/zhanm32/SPAREAD/CODE/scripts/CTS_test.R \
 ##		"/data/h_vmac/zhanm32/SPAREAD/DATA/ADNI/CTS_ADNI.rds" \
 ##		"/data/h_vmac/zhanm32/SPAREAD/DATA/ADNI/ADNI_EUR_snpweights_baseline" \
-##    "/data/h_vmac/zhanm32/SPAREAD/DATA/ADNI/ADNI_EUR_snpweights_baseline_frq.frq" \
 ##		"ID" \
 ##    "interval_years" \
 ##    "SPARE_AD" \
@@ -44,11 +42,11 @@
 ## ============================================================================================================================
 
 
-
-
 ###############################################################################################################
 #### Load packages
 ###############################################################################################################
+.libPaths("/data/h_vmac/zhanm32/envs/r_4p3p1_env/lib/R/library/")
+
 suppressPackageStartupMessages(require(data.table))
 suppressPackageStartupMessages(require(lme4))
 suppressPackageStartupMessages(require(lmerTest))
@@ -63,20 +61,19 @@ suppressPackageStartupMessages(require(qqman))
 args <- commandArgs(TRUE)
 
 ## Check if at least 5 arguments (without covariates) are provided
-if (length(args) < 9) {
-  stop("Error: Missing required arguments.\nUsage: Rscript CTS.R <pheno_file> <geno_file> <frq_file> <id_col> <time_col> <y_col> <fixedEffects> <outpath> <outprefix>\n")
+if (length(args) < 8) {
+  stop("Error: Missing required arguments.\nUsage: Rscript CTS.R <pheno_file> <geno_file> <id_col> <time_col> <y_col> <fixedEffects> <outpath> <outprefix>\n")
 }
 
 ## Required arguments
 pheno_file    <- args[1] # Full path and full name of the phenotype file.
 geno_file     <- args[2] # Full path and prefix of the genotype file.
-frq_file      <- args[3] # Full and full name of the SNP frequency file.
-id_col        <- args[4] # ID column name in the phenotype file. You have to make sure the IDs are consistent with the FID column in the genotype file.
-time_col      <- args[5] # Time variable column in the phenotype file
-y_col         <- args[6] # Outcome variable column in the phenotype file
-fixedEffects  <- args[7] # Fixed effects
-outpath       <- args[8] # Output path
-outprefix     <- args[9] # Output prefix
+id_col        <- args[3] # ID column name in the phenotype file. You have to make sure the IDs are consistent with the FID column in the genotype file.
+time_col      <- args[4] # Time variable column in the phenotype file
+y_col         <- args[5] # Outcome variable column in the phenotype file
+fixedEffects  <- args[6] # Fixed effects
+outpath       <- args[7] # Output path
+outprefix     <- args[8] # Output prefix
 
 ## Check if the files exist before proceeding
 if (!file.exists(pheno_file)) {
@@ -279,6 +276,9 @@ testsnpsout <- do.call(rbind, lapply(testsnps, function(snp) {
   return(res)
 }))
 
+## extract Effect Allele
+testsnpsout$A1 <- sapply(strsplit(testsnpsout$ID, "_"), `[`, 2)
+
 ## update the SNPs names 
 testsnpsout$ID <- sapply(strsplit(testsnpsout$ID, "_"), `[`, 1)
 
@@ -289,10 +289,18 @@ matched <- !is.na(idx) # Now, update only the rows that match (non-NA)
 dat$BETA[matched]    <- testsnpsout$BETA[idx[matched]]
 dat$SE[matched]      <- testsnpsout$SE[idx[matched]]
 dat$T_STAT[matched]  <- testsnpsout$T_STAT[idx[matched]]
-dat$P[matched]       <- testsnpsout$P[idx[matched]]
+dat$P[matched]       <- testsnpsout$P[idx[matched]] 
+## the PLINK raw file is counting the number of reference allele (effect allele in the regular LMM function above)
+## In the PLINK association file, the effect allele is alternate allele
+## so we have to update the A1 (effect allele) allele information in the dat and also the A1_FREQ info
+dat$A1[matched]       <- testsnpsout$A1[idx[matched]]
+dat$OMITTED[matched]  <- dat$ALT[matched]
+dat$A1_FREQ[matched]  <- 1-dat$A1_FREQ[matched]
 
+filepath = paste0(outpath,outprefix,"_CTS.Time.updated.glm.linear")
+fwrite(dat,filepath,col.names = T, row.names = F, quote = F, sep = "\t")
 
-message("The update for the CTS results file for those SNPs is complete.")
+message("The update for the CTS results file for those SNPs is complete and the updated association file is saved to: ",filepath)
 message("=======================================================================================================")
 message(" ")
 message(" ")
@@ -303,6 +311,8 @@ message(" ")
 ###############################################################################################################
 
 message("Now generating the QQ plots and Manhatton Plots")
+
+dat$P <- as.numeric(dat$P)
 
 ## calculate Lambda
 z=qnorm(dat$P/2)
@@ -338,7 +348,6 @@ dev.off()
 message("Manhatton plot without APOE region is located at: ",paste0(outpath,outprefix,"_CTS_Manhattan_noAPOE.png"))
 message(" ")
 
-
 message("=======================================================================================================")
 message(" ")
 message(" ")
@@ -352,19 +361,10 @@ message(" ")
 ## we need columns:  CHR SNP BP A1 TEST NMISS BETA SE L95 U95 STAT P
 options(scipen = 999)
 
-frqdat <- fread(frq_file,stringsAsFactors=F)
-frqdat <- as.data.frame(frqdat)
-frqdat <- frqdat[,c("SNP","A1","A2","MAF")]
-names(frqdat) <- c("MARKERNAME","EA","NEA","EAF")
-frqdat$STRAND <- "+"
+dat <- dat[order(dat$`#CHROM`,dat$POS), ] # Reorder based on the original order
 
-dat <- dat[,c("ID","BETA","SE","OBS_CT")]
-names(dat) <- c("MARKERNAME","BETA","SE","N")
-dat$ORIGINAL_ORDER <- seq_len(nrow(dat))
-
-dat <- merge(dat, frqdat, by = "MARKERNAME", all.x = TRUE)
-dat <- dat[order(dat$ORIGINAL_ORDER), ] # Reorder based on the original order
-dat <- dat[,c("MARKERNAME","EA","NEA","BETA","SE","N","EAF","STRAND")]
+dat <- dat[,c("ID","A1","OMITTED","BETA","SE","OBS_CT","A1_FREQ")]
+names(dat) <- c("MARKERNAME","EA","NEA","BETA","SE","N","EAF")
 
 ## save the updated association results
 datpath <- paste0(outpath,outprefix,"_CTS_LMM_clean_GWAMA")
