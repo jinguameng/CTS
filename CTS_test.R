@@ -359,6 +359,10 @@ message(" ")
 
 ## prepare data for GWAMA
 ## we need columns:  CHR SNP BP A1 TEST NMISS BETA SE L95 U95 STAT P
+## required columns for GWAMA input file: MARKERNAME (snp name), EA (effect allele), NEA (non effect allele),
+## BETA, SE / OR, OR_95L, OR_95U
+## Optional columns: N, EAF, STRAND, IMPUTED
+
 options(scipen = 999)
 
 dat <- dat[order(dat$`#CHROM`,dat$POS), ] # Reorder based on the original order
