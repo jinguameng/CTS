@@ -290,12 +290,6 @@ dat$BETA[matched]    <- testsnpsout$BETA[idx[matched]]
 dat$SE[matched]      <- testsnpsout$SE[idx[matched]]
 dat$T_STAT[matched]  <- testsnpsout$T_STAT[idx[matched]]
 dat$P[matched]       <- testsnpsout$P[idx[matched]] 
-## the PLINK raw file is counting the number of reference allele (effect allele in the regular LMM function above)
-## In the PLINK association file, the effect allele is alternate allele
-## so we have to update the A1 (effect allele) allele information in the dat and also the A1_FREQ info
-dat$A1[matched]       <- testsnpsout$A1[idx[matched]]
-dat$OMITTED[matched]  <- dat$ALT[matched]
-dat$A1_FREQ[matched]  <- 1-dat$A1_FREQ[matched]
 
 filepath = paste0(outpath,outprefix,"_CTS.Time.updated.glm.linear")
 fwrite(dat,filepath,col.names = T, row.names = F, quote = F, sep = "\t")
