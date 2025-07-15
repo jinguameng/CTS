@@ -50,7 +50,7 @@
 suppressPackageStartupMessages(require(data.table))
 suppressPackageStartupMessages(require(lme4))
 suppressPackageStartupMessages(require(lmerTest))
-suppressPackageStartupMessages(require(tidyverse))
+suppressPackageStartupMessages(require(dplyr))
 suppressPackageStartupMessages(require(qqman))
 
 `%!in%` <- Negate(`%in%`)
