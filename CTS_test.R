@@ -11,7 +11,7 @@
 ##		pheno_file      - Full path to the phenotype file, longitudinal dataset with long-format
 ##                      -- RDS format
 ##                      -- covariates should be included for LMM analysis
-##                      -- FID and IID columns should also be included
+##                      -- **FID and IID columns should also be included**
 ##                      -- Example pheno_file: /data/h_vmac/zhanm32/SPAREAD/DATA/ADNI/CTS_ADNI.rds
 ##		geno_file       - Full path to the genotype file, file prefix included (PLINK .bim format)
 ## 		id_col          - Column name in the phenotype file representing subject IDs
@@ -68,7 +68,7 @@ if (length(args) < 8) {
 ## Required arguments
 pheno_file    <- args[1] # Full path and full name of the phenotype file.
 geno_file     <- args[2] # Full path and prefix of the genotype file.
-id_col        <- args[3] # ID column name in the phenotype file. You have to make sure the IDs are consistent with the FID column in the genotype file.
+id_col        <- args[3] # ID column name in the phenotype file.
 time_col      <- args[4] # Time variable column in the phenotype file
 y_col         <- args[5] # Outcome variable column in the phenotype file
 fixedEffects  <- args[6] # Fixed effects
